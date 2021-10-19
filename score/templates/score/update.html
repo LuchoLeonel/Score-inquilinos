@@ -1,0 +1,69 @@
+{% extends "score/layout.html" %}
+{% load static %}
+
+{% block body %}
+
+    <div class="cabecera">
+
+        <h2 class="title">Update Profile:</h2>
+
+        <div class="message">
+            {% if message %}
+                <p><b>{{ message }}</b></p>
+            {% endif %}
+        </div>
+    
+    </div>
+
+    <div class="form">
+        <form action="{% url 'update' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <ul class="form-container">
+                <li>Nombre de usuario:
+                    <input class="form-input" autofocus type="text" name="username" value="{{usuario.username}}">
+                </li>
+                <li>Email:
+                    <input class="form-input" type="email" name="email" value="{{usuario.email}}">
+                </li>
+                <li>Nombre:
+                    <input class="form-input" type="text" name="nombre" value="{{usuario.nombre}}">
+                </li>
+                <li>Apellido:
+                    <input class="form-input" type="text" name="apellido" value="{{usuario.apellido}}">
+                </li>
+                <li> Descripción:
+                    <textarea class="form-input" type="text" name="descripcion">{{usuario.descripcion}}</textarea>
+                </li>
+                <li> ¿Sos propietario?
+                    <select class="form-input" name="propietario">
+                        <option disabled>¿Sos propietario?</option>
+                        {% if usuario.propietario %}
+                            <option value="si">Si</option>
+                            <option value="no">No</option>
+                        {% else %}
+                            <option value="no">No</option>
+                            <option value="si">Si</option>
+                        {% endif %}
+                    </select>
+                </li>
+                <li> ¿Es inquilino?
+                    <select class="form-input" name="inquilino">
+                        <option disabled>¿Es inquilino?</option>
+                        {% if usuario.inquilino %}
+                            <option value="si">Si</option>
+                            <option value="no">No</option>
+                        {% else %}
+                            <option value="no">No</option>
+                            <option value="si">Si</option>
+                        {% endif %}
+                    </select>
+                </li>
+            <li> Foto de Perfil: 
+                <input class="form-input" type="file" name="adjunto" accept=".pdf,.jpg,.png">
+            </li>
+            <li><input class="form-input form-button" type="submit" class="btn btn-primary" value="Update"></li>
+        </form>
+    </div>
+
+
+{% endblock %}

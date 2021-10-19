@@ -1,0 +1,142 @@
+{% extends "score/layout.html" %}
+{% load static %}
+
+{% block body %}
+
+    <div class="cabecera">
+
+        <h2 class="title">Profile:</h2>
+        
+        <div class="message">
+            {% if message %}
+                <p><b>{{ message }}</b></p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div class="container p-3 my-3 border details">
+        <div class="details-image">
+            {% if usuario.image %}
+                <img src="{{ usuario.image.url }}" alt="{{ usuario.username }}">
+            {% else %}
+                <img src="{% static 'score/media/anonymous.png' %}" alt="{{ usuario.username }}">
+            {% endif %}
+        <div class="details-username">{{usuario.username}}</div>
+        </div>
+        
+        <div class="details-info">
+            <ul>
+                <li>
+                    <div class="details-nombre"><b>Nombre: </b>{{ usuario.nombre}}</div>
+                </li>
+                <li>
+                    <div class="details-apellido"><b>Apellido: </b>{{ usuario.apellido}}</div>
+                </li>
+                    {% if usuario.descripcion %}
+                        <li><div class="details-descripcion">Descripcion: {{ usuario.descripcion}}</div></li>
+                    {% endif %}
+                    {% if usuario == user %}
+                            <li><div> DNI: {{usuario.dni }}</div></li>
+                    {% endif %}
+                    {% if usuario.propietario %}
+                        <li><div>Es propietario</div></li>
+                    {% endif %}
+                    {% if usuario.inquilino %}
+                        <li><div>Es inquilino</div></li>
+                        <li><div><b>Score: {{ usuario.average }}</b></div></li>
+                    {% endif %}
+                    {% if not usuario.inquilino and usuario.average %}
+                        <li><div>Ya no es más inquilino pero aún puedes ver sus puntajes.</div></li>
+                        <li><div><b>Score: {{ usuario.average }}</b></div></li>
+                    {% endif %}
+                    {% if not usuario.propietario and not usuario.inquilino %}
+                        <li><div>No es propietario ni inquilino</div></li>
+                    {% endif %}
+                    
+                    <li>
+                        <div class="details-timestamp">Profile created on {{ usuario.timestamp}}</div>
+                    </li>
+
+                {% if user.is_authenticated %}
+                    {% if user.id != usuario.id %}
+                        {% if not allow.allow_to_be_scored and not allow.they_score and user.inquilino and usuario.propietario %}
+                            <li id="change-allow">
+                                <button id="allow-score" onclick="allowScore({{usuario.id}}, {{user.id}})" class="btn btn-primary profile-button">Permitir que me califique</button>
+                            </li>
+                        {% endif %}
+                        {% if allow.allow_to_be_scored and not allow.they_score and user.inquilino and usuario.propietario %}
+                            <li>Habilitaste a este usuario a calificarte.</li>
+                        {% endif %}
+                    {% endif %}
+                    {% if user.id == usuario.id %}
+                        <li><a href="{% url 'update' %}" id="update-profile" class="btn btn-primary profile-button">Update Profile</a></li>
+                        <li><a href="{% url 'changePassword' %}" id="change-password" class="change-password">Change password</a></li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+        </div>
+                
+        {% if user.is_authenticated %}
+            {% if user.id != usuario.id %}
+                {% if allow.allow_to_score and not allow.my_score and user.propietario and usuario.inquilino %}
+                    <div class="details-califica">
+                        <ul>
+                            <li class="details-califica-li"><i>Este usuario te habilitó a calificarlo.</i></li>
+                            <li class="details-califica-li"><button id="make-score" onclick="makeScore({{usuario.id}}, {{user.id}})" class="btn btn-primary profile-button">Calificar inquilino</button></li>
+                            <div id="submit-score">
+                                <li class="details-califica-li"><button id="unmake-score" onclick="unmakeScore({{usuario.id}}, {{user.id}})" class="btn btn-primary profile-button">No calificar</button></li>
+                                <form method="POST" autocomplete="off">
+                                    {% csrf_token %}
+                                    Score:
+                                    <select class="details-califica-li" name="scoring">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="10">10</option>
+                                    </select>
+                                    <div class="details-califica-li">desde: <input type="date" name="desde"></div>
+                                    <div class="details-califica-li">hasta: <input type="date" name="hasta"></div>
+                                    <div class="details-califica-li"><textarea type="text" name="comentario" autofocus ></textarea></div>
+                                    <div class="details-califica-li"><input type="submit" class="btn btn-primary profile-button" name="boton-enviar" value="Enviar calificación"></div>
+                                </form>
+                            </div>
+                        </ul>
+                    </div>
+                {% endif %}
+                {% if allow.my_score and user.propietario and usuario.inquilino %}
+                    <li class="details-califica puntos"><i>Calificaste a este usuario con {{allow.my_score.puntaje}} puntos</i></li>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    </div>
+
+
+    {% if scores %}
+    <div class="scores"><h2 class="title">Scores: </h2></div>
+        {% for score in scores %}
+            <div class="container p-3 my-3 border">
+                <a class="scores-propietario" href="{% url 'profile' score.propietario.id %}"> {{score.propietario}} </a>
+                <div class="scores-puntaje"><b> Score: {{score.puntaje}} </b></div>
+                <div class="scores-estadia"> Estadia desde {{score.desde}} hasta {{score.hasta}}</div>
+                <div class="scores-time"><b> {{score.time}} </b></div>
+                {% if score.comentario %}
+                    <div class="container p-3 my-3 border">
+                      <div class="scores-comentario"> {{score.comentario}} </div>
+                    </div>
+                {% else %}
+                    <div class="scores-comentario">No realizó ningún comentario.</div>
+                {% endif %}
+                <div class="scores-timestamp"> Score realizado en {{score.timestamp}} </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="back"><a class="back-to-inquilinos" href="{% url 'index' %}">Ir a lista de Inquilinos</a></div>
+{% endblock %}

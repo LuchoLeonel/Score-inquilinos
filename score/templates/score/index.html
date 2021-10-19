@@ -1,0 +1,45 @@
+{% extends "score/layout.html" %}
+{% load static %}
+
+{% block body %}
+
+    <div class="cabecera">
+
+        <h2 class="title">Listado de {{tipo}}:</h2>
+
+        <div class="message">
+            {% if message %}
+                <p><b>{{ message }}</b></p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <ul class="usuarios">
+    {% for usuario in usuarios %}
+            <li>
+                <div class="usuario">
+                    {% if usuario.image %}
+                        <a href="{% url 'profile' usuario.id %}"><img class="usuario-image" src="{{ usuario.image.url }}" alt="{{ usuario.username }}"></a>
+                    {% else %}
+                        <a href="{% url 'profile' usuario.id %}"><img class="usuario-image" src="{% static 'score/media/anonymous.png' %}" alt="{{ usuario.username }}"></a>
+                    {% endif %}
+
+                    <a class="usuario-username" href="{% url 'profile' usuario.id %}">{{usuario.username}}</a>
+                    <a class="usuario-nombre" href="{% url 'profile' usuario.id %}">Nombre: {{ usuario.nombre }}</a>
+                    <a class="usuario-apellido" href="{% url 'profile' usuario.id %}">Apellido: {{ usuario.apellido}}</a>
+                    {% if usuario.inquilino %}
+                        <a class="usuario-score" href="{% url 'profile' usuario.id %}"><i>Score: {{ usuario.average }} puntos</i></a>
+                    {% else %}
+                        <div class="usuario-score"></div>
+                    {% endif %}
+                </div>
+            </li>
+
+    {% empty %}
+        <div>No hay {{tipo}}.</div>
+    {% endfor %}
+    
+    </ul>
+
+{% endblock %}

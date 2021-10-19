@@ -1,0 +1,36 @@
+{% extends "score/layout.html" %}
+{% load static %}
+
+{% block body %}
+
+    <div class="cabecera">
+
+        <h2 class="title">Log-in:</h2>
+
+        <div class="message">
+            {% if message %}
+                <p><b>{{ message }}</b></p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div class="form">
+        <form action="{% url 'login' %}" method="post">
+            {% csrf_token %}
+            <ul class="form-container">
+                <li>
+                    <input autofocus class="form-input" type="text" name="username" placeholder="Username">
+                </li>
+                <li>
+                    <input class="form-input" type="password" name="password" placeholder="Password">
+                </li>
+
+                <li><input class="form-input form-button" type="submit" value="Login"></li>
+
+                <li>Don't have an account? <a href="{% url 'register' %}">Register here.</a></li>
+            </ul>
+        </form>
+    </div>
+
+{% endblock %}
